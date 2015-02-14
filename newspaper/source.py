@@ -85,7 +85,7 @@ class Source(object):
         self.is_parsed = False
         self.is_downloaded = False
 
-    def build(self):
+    def build(self, a_tag, url_filter):
         """Encapsulates download and basic parsing with lxml. May be a
         good idea to split this into download() and parse() methods.
         """
@@ -100,7 +100,7 @@ class Source(object):
         self.download_feeds()       # mthread
         # TODO: self.parse_feeds()  # regex for now
 
-        self.generate_articles()
+        self.generate_articles(a_tag, url_filter)
 
     def purge_articles(self, reason, articles):
         """Delete rejected articles, if there is an articles param,
@@ -225,7 +225,7 @@ class Source(object):
         """
         articles = []
         for feed in self.feeds:
-            urls = self.extractor.get_urls(feed.rss, regex=True)
+            urls = self.extractor.get_urls(feed.rss, 'a', regex=True)
             cur_articles = []
             before_purge = len(urls)
 
@@ -252,14 +252,14 @@ class Source(object):
                       (before_purge, after_purge, after_memo, feed.url))
         return articles
 
-    def categories_to_articles(self):
+    def categories_to_articles(self, a_tag):
         """Takes the categories, splays them into a big list of urls and churns
         the articles out of each url with the url_to_article method
         """
         articles = []
         for category in self.categories:
             cur_articles = []
-            url_title_tups = self.extractor.get_urls(category.doc, titles=True)
+            url_title_tups = self.extractor.get_urls(category.doc, a_tag, titles=True)
             before_purge = len(url_title_tups)
 
             for tup in url_title_tups:
@@ -290,20 +290,23 @@ class Source(object):
                       (before_purge, after_purge, after_memo, category.url))
         return articles
 
-    def _generate_articles(self):
+    def _generate_articles(self, a_tag, url_filter):
         """Returns a list of all articles, from both categories and feeds
         """
         category_articles = self.categories_to_articles()
-        feed_articles = self.feeds_to_articles()
+        #feed_articles = self.feeds_to_articles()
 
-        articles = feed_articles + category_articles
+        #articles = feed_articles + category_articles
+        articles = category_articles
+        regex = re.compile(url_filter)
+        articles = [article for article in articles if regex.search(article.url)]
         uniq = {article.url: article for article in articles}
         return uniq.values()
 
-    def generate_articles(self, limit=5000):
+    def generate_articles(self, a_tag, url_filter, limit=5000):
         """Saves all current articles of news source, filter out bad urls
         """
-        articles = self._generate_articles()
+        articles = self._generate_articles(a_tag, url_filter)
         self.articles = articles[:limit]
         log.debug(len(articles), 'articles generated and cutoff at', limit)
 

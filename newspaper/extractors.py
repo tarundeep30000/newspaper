@@ -465,14 +465,14 @@ class ContentExtractor(object):
             return urlparse.urljoin(article_url, node_images[0])
         return u''
 
-    def _get_urls(self, doc, titles):
+    def _get_urls(self, doc, titles, a_tag):
         """Return a list of urls or a list of (url, title_text) tuples
         if specified.
         """
         if doc is None:
             return []
 
-        a_kwargs = {'tag': 'a'}
+        a_kwargs = {'tag': a_tag}
         a_tags = self.parser.getElementsByTag(doc, **a_kwargs)
 
         # TODO: this should be refactored! We should have a seperate
@@ -481,7 +481,7 @@ class ContentExtractor(object):
             return [(a.get('href'), a.text) for a in a_tags if a.get('href')]
         return [a.get('href') for a in a_tags if a.get('href')]
 
-    def get_urls(self, doc_or_html, titles=False, regex=False):
+    def get_urls(self, doc_or_html, a_tag='a', titles=False, regex=False):
         """`doc_or_html`s html page or doc and returns list of urls, the regex
         flag indicates we don't parse via lxml and just search the html.
         """
@@ -501,7 +501,7 @@ class ContentExtractor(object):
             doc = self.parser.fromstring(doc_or_html)
         else:
             doc = doc_or_html
-        return self._get_urls(doc, titles)
+        return self._get_urls(doc, titles, a_tag)
 
     def get_category_urls(self, source_url, doc):
         """Inputs source lxml root and source url, extracts domain and

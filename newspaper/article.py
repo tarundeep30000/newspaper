@@ -80,6 +80,9 @@ class Article(object):
         # `tags` are also extracted via parse() from <meta> tags
         self.tags = set()
 
+        # Name of the article publisher
+        self.publisher = u''
+
         # List of authors who have published the article, via parse()
         self.authors = []
 
@@ -213,8 +216,8 @@ class Article(object):
         text = u''
         self.top_node = self.extractor.calculate_best_node(self.doc)
         if self.top_node is not None:
-            video_extractor = VideoExtractor(self.config, self.top_node)
-            self.set_movies(video_extractor.get_videos())
+#            video_extractor = VideoExtractor(self.config, self.top_node)
+#            self.set_movies(video_extractor.get_videos())
 
             self.top_node = self.extractor.post_cleanup(self.top_node)
             self.clean_top_node = copy.deepcopy(self.top_node)
@@ -235,19 +238,18 @@ class Article(object):
             meta_img_url = self.extractor.get_meta_img_url(
                 self.url, self.clean_doc)
             self.set_meta_img(meta_img_url)
+#            imgs = self.extractor.get_img_urls(self.url, self.clean_doc)
+#            if self.meta_img:
+#                imgs.add(self.meta_img)
+#            self.set_imgs(imgs)
 
-            imgs = self.extractor.get_img_urls(self.url, self.clean_doc)
-            if self.meta_img:
-                imgs.add(self.meta_img)
-            self.set_imgs(imgs)
+#        if self.clean_top_node is not None and not self.has_top_image():
+#            first_img = self.extractor.get_first_img_url(
+#                self.url, self.clean_top_node)
+#            self.set_top_img(first_img)
 
-        if self.clean_top_node is not None and not self.has_top_image():
-            first_img = self.extractor.get_first_img_url(
-                self.url, self.clean_top_node)
-            self.set_top_img(first_img)
-
-        if not self.has_top_image():
-            self.set_reddit_top_img()
+#        if not self.has_top_image():
+#            self.set_reddit_top_img()
 
     def has_top_image(self):
         return self.top_img is not None and self.top_img != u''
@@ -397,10 +399,11 @@ class Article(object):
         self.set_top_img_no_check(src_url)
 
     def set_top_img(self, src_url):
-        if src_url is not None:
-            s = images.Scraper(self)
-            if s.satisfies_requirements(src_url):
-                self.set_top_img_no_check(src_url)
+        #if src_url is not None:
+        #    s = images.Scraper(self)
+        #    if s.satisfies_requirements(src_url):
+        #        self.set_top_img_no_check(src_url)
+        self.set_top_img_no_check(src_url)
 
     def set_top_img_no_check(self, src_url):
         """Provide 2 APIs for images. One at "top_img", "imgs"

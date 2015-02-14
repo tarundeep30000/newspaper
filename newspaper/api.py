@@ -19,7 +19,7 @@ from .source import Source
 from .utils import extend_config, get_unicode, print_available_languages
 
 
-def build(url=u'', dry=False, config=None, **kwargs):
+def build(url=u'', a_tag = 'a', url_filter = r'.*', dry=False, config=None, **kwargs):
     """Returns a constructed source object without
     downloading or parsing the articles
     """
@@ -28,7 +28,7 @@ def build(url=u'', dry=False, config=None, **kwargs):
     url = url or ''
     s = Source(url, config=config)
     if not dry:
-        s.build()
+        s.build(a_tag, url_filter)
     return s
 
 
