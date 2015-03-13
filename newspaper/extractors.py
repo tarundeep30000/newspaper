@@ -212,8 +212,83 @@ class ContentExtractor(object):
                 datetime_obj = parse_date_str(date_str)
                 if datetime_obj:
                     return datetime_obj
+        date_str = self.get_publishing_date_customlogic(doc)
+        return date_str
+        #return None
 
-        return None
+    def get_publishing_date_customlogic(self, doc):
+        """Returns the modified/published time as specified by the website
+        """
+        published_date = self.get_tag_text(doc, 'span[id="ctl00_ContentPlaceHolder1_lblDate"]')
+        meta_attr_names = ['name', 'itemprop', 'property', 'http-equiv']
+        meta_attr_values = [
+            'datePublished', 'article:published_time', 'rnews:datePublished', 'article_date_original',
+            'OriginalPublicationDate', 'publish-date', 'published-date', 'DISPLAYDATE', 'DATE',
+            'sailthru.date', 'dateCreated', 'pubdate', 'DC.date.issued', 'pdate', 't_omni_pubdate']
+        for attr_name in meta_attr_names:
+            for attr_value in meta_attr_values:
+                if published_date == '':
+                    published_date = self.get_meta_content(doc, 'meta[{0}="{1}"]'.format(attr_name, attr_value))
+
+        meta_attr_values = [
+            'eomportal-lastUpdate', 'article:modified_time',
+            'og:updated_time', 'Last-Modified', 'last-modified',
+            'dateModified', 'lastReviewed', 'REVISION_DATE', 'date', 'Date']
+        for attr_name in meta_attr_names:
+            for attr_value in meta_attr_values:
+                if published_date == '':
+                    published_date = self.get_meta_content(doc, 'meta[{0}="{1}"]'.format(attr_name, attr_value))
+
+        tag_names = ['time', 'div', 'article', 'span', 'p']
+        tag_attr_names = ['itemprop', 'class', 'id']
+        tag_attr_values = [
+            'datePublished', 'publishedDateline', 'article-header__time', 'article-header-date',
+            'pb-timestamp', 'author_and_date', 'a-date-published', 'pubdate', 'o-date',
+            'article-date', 'article_date', 'published-date', 'post_date', 'post_datetimes']
+        for tag_name in tag_names:
+            for attr_name in tag_attr_names:
+                for attr_value in tag_attr_values:
+                   if published_date == '':
+                       published_date = self.get_tag_text(doc, '{0}[{1}="{2}"]'.format(tag_name, attr_name, attr_value))
+
+        tag_attr_values = [
+            'txtupdatetimeb', 'modifiedDateline', 'last-updated', 'last-modified-date',
+            'entry-date', 'toolbox_date', 'dateleft', 'timestamp', 'date-block', 'update-time']
+
+        for tag_name in tag_names:
+            for attr_name in tag_attr_names:
+                for attr_value in tag_attr_values:
+                   if published_date == '':
+                       published_date = self.get_tag_text(doc, '{0}[{1}="{2}"]'.format(tag_name, attr_name, attr_value))
+
+        if published_date == '':
+            published_date = self.get_tag_text(doc, 'footer[class="submitted"]')
+        if published_date == '':
+            published_date = self.get_tag_text(doc, 'span[class~="story_item_date"]')
+        if published_date == '':
+            published_date = self.get_tag_text(doc, 'h5[class="timestamp"]')
+        if published_date == '':
+            published_date = self.get_tag_text(doc, 'p[class~="dateline"]')
+        if published_date == '':
+            published_date = self.get_tag_text(doc, 'article[class~="by_now"]')
+        if published_date == '':
+            published_date = self.get_tag_text(doc, 'div[class="field field-type-text field-field-dateline"]')
+        if published_date == '':
+            published_date = self.get_tag_text(doc, 'p[class="wirecet"]')
+
+        tag_attr_values = [
+            'entry-meta', 'created', 'date', 'time', 'byline', 'dateline',
+            'sty_pub', 'mod-article-byline', 'livenewsbyline', 'story-details']
+
+        for tag_name in tag_names:
+            for attr_name in tag_attr_names:
+                for attr_value in tag_attr_values:
+                   if published_date == '':
+                       published_date = self.get_tag_text(doc, '{0}[{1}="{2}"]'.format(tag_name, attr_name, attr_value))
+
+        if published_date == '':
+            published_date = self.get_tag_text(doc, 'div[class="strstrap"]')
+        return published_date
 
     def get_title(self, doc):
         """Fetch the article title and analyze it
@@ -344,6 +419,28 @@ class ContentExtractor(object):
         content = None
         if meta is not None and len(meta) > 0:
             content = self.parser.getAttribute(meta[0], 'content')
+        if content:
+            return content.strip()
+        return ''
+
+    def get_tag_text(self, doc, tagName):
+        """Extract a given tag inner text from document.
+        """
+        tag = self.parser.css_select(doc, tagName)
+        content = None
+        if tag is not None and len(tag) > 0:
+            content = self.parser.getText(tag[0])
+        if content:
+            return content.strip()
+        return ''
+
+    def get_tag_attribute(self, doc, tagName, attrib):
+        """Extract a given tag inner text from document.
+        """
+        tag = self.parser.css_select(doc, tagName)
+        content = None
+        if tag is not None and len(tag) > 0:
+            content = self.parser.getAttribute(tag[0], attrib)
         if content:
             return content.strip()
         return ''
