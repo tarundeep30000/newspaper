@@ -13,7 +13,9 @@ __copyright__ = 'Copyright 2014, Lucas Ou-Yang'
 
 from collections import defaultdict
 import copy
+from datetime import datetime
 from dateutil.parser import parse as date_parser
+import pytz
 import logging
 import re
 import urlparse
@@ -163,6 +165,76 @@ class ContentExtractor(object):
         #    return [] # Failed to find anything
         # return authors
 
+    ###########date parsing#################
+    def fuzzy_date_match(self, published_time):
+        default_time_value = datetime(year = 1, month = 1, day = 1)
+        default_time_value = default_time_value.replace(tzinfo=pytz.UTC)
+        ptime = None
+        try:
+            ptime = date_parser(published_time, fuzzy = True, default = default_time_value)
+            if (ptime == default_time_value):
+                #print "fuzzy_match::got default time value for:", published_time
+                pass
+            if (ptime != None and ptime != default_time_value):
+                return ptime
+        except Exception, e:
+            #print "fucked in parsing0:", e
+            #print published_time
+            pass
+        splitters = ['P ', 'Updated', 'updated', "yyyy", "HH:mm"]
+        #this handles inability of datetime.parse
+        #to handle 'P ', multiple dates etc
+        for splitter in splitters:
+            tokens = published_time.split(splitter)
+            tokens = [x.strip() for x in tokens]
+            tokens = [x for x in tokens if (x != "" and (not (x.isalpha()))) ]
+            #print tokens
+            if (len(tokens) == 1):
+                continue
+            for xx in tokens:
+                try:
+                    pt = date_parser(xx, fuzzy = True, default = default_time_value)
+                    if (pt == None or pt == default_time_value):
+                        #print "fucked in parsing1:", xx
+                        continue
+                    else:
+                        #print "fuzzy matched", xx, " to ", pt
+                        return pt
+                except Exception, e:
+                    #print "fucked in parsing3:", e
+                    #print xx
+                    continue
+        return None
+
+    def parse_date(self, published_time, use_current_date_on_fail = True):
+        ptime = None
+        published_time = published_time.encode('ascii', 'ignore')
+        try:
+            ptime = date_parser(published_time)
+        except:
+            ptime = self.fuzzy_date_match(published_time)
+        time_now = datetime.utcnow()
+        time_now = time_now.replace(tzinfo=pytz.UTC)
+        if (ptime == None):
+            print "parse_date::failed for", published_time
+            if (not use_current_date_on_fail):
+                return None
+            else:
+                print "parse_date::using current_time for", published_time
+                ptime = time_now
+        try:
+            if (ptime.tzinfo == None):
+                ptime = ptime.replace(tzinfo=pytz.UTC)
+
+            if (ptime > time_now):
+                print "parse_date::time greater than current time"
+                print "parse_date::published_time:", published_time, " converted_to:", ptime, " current_utc:", time_now
+                ptime = time_now
+        except:
+            ptime = None
+        return ptime
+    ############end date parsing#########################
+
     def get_publishing_date(self, url, doc):
         """3 strategies for publishing date extraction. The strategies
         are descending in accuracy and the next strategy is only
@@ -213,7 +285,8 @@ class ContentExtractor(object):
                 if datetime_obj:
                     return datetime_obj
         date_str = self.get_publishing_date_customlogic(doc)
-        return date_str
+        datetime_obj = self.parse_date(date_str, False)
+        return datetime_obj
         #return None
 
     def get_publishing_date_customlogic(self, doc):

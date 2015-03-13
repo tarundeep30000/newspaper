@@ -129,6 +129,7 @@ class ExhaustiveFullTextCase(unittest.TestCase):
 
 class ArticleTestCase(unittest.TestCase):
     def runTest(self):
+        self.test_date_extraction()
         self.test_url()
         self.test_download_html()
         self.test_pre_download_parse()
@@ -196,6 +197,39 @@ class ArticleTestCase(unittest.TestCase):
         assert len(self.article.imgs) == LEN_IMGS
         assert self.article.meta_lang == META_LANG
         assert str(self.article.publish_date) == '2013-11-27 00:00:00'
+
+    @print_test
+    def test_date_extraction(self):
+        dates = ["2015-01-23",
+                "ET Bureau",
+                "Nall 2014 12 Oct 1732"
+                "Radhika P Nall 2014 12 Oct 1732",
+                "Radhika Nall 2014 12 Oct 1732",
+                "Radhika PNall 2014 12 Oct 1732P",
+                "Radhika PNall 2014 12 Oct 1732",
+                "2014 12 Oct 1732 Radhika PNall",
+                "1:13 P.M. ET",
+                "01:01 (29/11/2014)",
+                "01:01 IST(29/11/2014)",
+                "First Published: 00:57 IST(29/11/2014) | Last Updated: 01:01 IST(29/11/2014) ",
+                "07:27:30 PM Monday, November 24, 2014",
+                "Saturday, 22 November 2014 - 9:15pm IST",
+                "RadhikaPNall 2014 12 Oct 1732",
+                "Nall 2014 12 Oct 1732",
+                "07:36:43 PM Saturday, November 22, 2014",
+                "2014-10-18T16:08:03.000",
+                "2014-10-18T16:08:03.000Z",
+                "2014-10-18T16:08:03.000Zyyyy-MM-dd HH:mm:ss z",
+                "Sunday, 19 October 2014 - 7:56am IST Updated: Sunday, 19 October 2014 - 11:20am IST | Agency: DNA web desk"
+                "2014 12 Oct 1732"]
+        count = 0
+        for date in dates:
+            parsed_date = self.article.extractor.parse_date(date)
+            if (parsed_date != None):
+                count += 1
+            print (date, " parsed: ", parsed_date)
+            print ("================================")
+        assert count >= 0.8 * len(dates)
 
     @print_test
     def test_meta_type_extraction(self):
