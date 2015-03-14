@@ -12,7 +12,7 @@ __license__ = 'MIT'
 __copyright__ = 'Copyright 2014, Lucas Ou-Yang'
 
 from collections import defaultdict
-import copy
+import copy, time
 from datetime import datetime
 from dateutil.parser import parse as date_parser
 import pytz
@@ -232,6 +232,7 @@ class ContentExtractor(object):
                 ptime = time_now
         except:
             ptime = None
+        ptime = datetime.fromtimestamp(time.mktime(ptime.utctimetuple()))
         return ptime
     ############end date parsing#########################
 

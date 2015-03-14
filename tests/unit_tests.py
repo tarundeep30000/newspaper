@@ -201,6 +201,7 @@ class ArticleTestCase(unittest.TestCase):
     @print_test
     def test_date_extraction(self):
         dates = ["2015-01-23",
+                "2015-03-14T10:00:06+05:30",
                 "ET Bureau",
                 "Nall 2014 12 Oct 1732"
                 "Radhika P Nall 2014 12 Oct 1732",
