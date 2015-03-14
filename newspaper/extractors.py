@@ -284,10 +284,7 @@ class ContentExtractor(object):
                 datetime_obj = parse_date_str(date_str)
                 if datetime_obj:
                     return datetime_obj
-        date_str = self.get_publishing_date_customlogic(doc)
-        datetime_obj = self.parse_date(date_str, False)
-        return datetime_obj
-        #return None
+        return None
 
     def get_publishing_date_customlogic(self, doc):
         """Returns the modified/published time as specified by the website
@@ -361,7 +358,8 @@ class ContentExtractor(object):
 
         if published_date == '':
             published_date = self.get_tag_text(doc, 'div[class="strstrap"]')
-        return published_date
+        datetime_obj = self.parse_date(published_date, False)
+        return datetime_obj
 
     def get_title(self, doc):
         """Fetch the article title and analyze it

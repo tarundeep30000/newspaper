@@ -209,7 +209,14 @@ class Article(object):
         self.publish_date = self.extractor.get_publishing_date(
             self.url,
             self.clean_doc)
-
+        #custom date extraction logic
+        date1 = self.publish_date
+        date2 = self.extractor.get_publishing_date_customlogic(self.clean_doc)
+        if (date1 == None):
+            self.publish_date = date2
+        elif (date2 != None):
+            if (date1.year == date2.year and date1.day == date2.day and date1.month == date2.month):
+                self.publish_date = date2
         # Before any computations on the body, clean DOM object
         self.doc = document_cleaner.clean(self.doc)
 
