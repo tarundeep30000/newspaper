@@ -536,7 +536,16 @@ class ContentExtractor(object):
         if try_three is None:
             try_four = self.get_meta_content(doc, 'meta[name="og:image"]')
 
+        #custom attempts to extract
+        try_five = None
+        try_six = None
+        if (try_four == None):
+            try_five = self.get_tag_attribute(doc, 'img[id="story_image_main"]', 'src')
+        if (try_five == None):
+            try_six = self.get_meta_content(doc, 'meta[name="twitter:image"]')
+
         top_meta_image = try_one or try_two or try_three or try_four
+        top_meta_image = top_meta_image or try_five or try_six
 
         if top_meta_image:
             return urlparse.urljoin(article_url, top_meta_image)
