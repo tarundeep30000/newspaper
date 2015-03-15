@@ -53,8 +53,9 @@ class Parser(object):
                 html = re.sub(r'^\<\?.*?\?\>', '', html, flags=re.DOTALL)
             cls.doc = lxml.html.fromstring(html)
             return cls.doc
-        except Exception:
-            traceback.print_exc()
+        except Exception, e:
+            print '[Parse lxml ERR]', str(e)
+            #traceback.print_exc()
             return None
 
     @classmethod
