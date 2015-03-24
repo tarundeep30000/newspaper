@@ -206,6 +206,17 @@ class ContentExtractor(object):
                     continue
         return None
 
+    def check_time(self, ptime):
+        if (ptime.tzinfo == None):
+            ptime = ptime.replace(tzinfo=pytz.UTC)
+        time_now = datetime.utcnow()
+        time_now = time_now.replace(tzinfo=pytz.UTC)
+        if (ptime > time_now):
+            print "check_time::time greater than current time"
+            print "check_time::", ptime, "converted to current_utc:", time_now
+            ptime = time_now
+        return ptime
+
     def parse_date(self, published_time, use_current_date_on_fail = True):
         ptime = None
         published_time = published_time.encode('ascii', 'ignore')
@@ -223,13 +234,7 @@ class ContentExtractor(object):
                 print "parse_date::using current_time for", published_time
                 ptime = time_now
         try:
-            if (ptime.tzinfo == None):
-                ptime = ptime.replace(tzinfo=pytz.UTC)
-
-            if (ptime > time_now):
-                print "parse_date::time greater than current time"
-                print "parse_date::published_time:", published_time, " converted_to:", ptime, " current_utc:", time_now
-                ptime = time_now
+            ptime = self.check_time(ptime)
         except:
             ptime = None
         ptime = datetime.fromtimestamp(time.mktime(ptime.utctimetuple()))

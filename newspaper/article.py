@@ -217,6 +217,7 @@ class Article(object):
         elif (date2 != None):
             if (date1.year == date2.year and date1.day == date2.day and date1.month == date2.month):
                 self.publish_date = date2
+        self.publish_date = self.extractor.check_time(self.publish_date)
         # Before any computations on the body, clean DOM object
         self.doc = document_cleaner.clean(self.doc)
 
