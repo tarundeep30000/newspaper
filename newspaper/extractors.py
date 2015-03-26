@@ -207,10 +207,12 @@ class ContentExtractor(object):
         return None
 
     def check_time(self, ptime):
-        if (ptime.tzinfo == None):
-            ptime = ptime.replace(tzinfo=pytz.UTC)
+        if (ptime == None):
+            return None
         time_now = datetime.utcnow()
         time_now = time_now.replace(tzinfo=pytz.UTC)
+        if (ptime.tzinfo == None):
+            ptime = ptime.replace(tzinfo=pytz.UTC)
         if (ptime > time_now):
             print "check_time::time greater than current time"
             print "check_time::", ptime, "converted to current_utc:", time_now
