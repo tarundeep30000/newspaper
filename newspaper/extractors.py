@@ -314,7 +314,7 @@ class ContentExtractor(object):
             'dateModified', 'lastReviewed', 'REVISION_DATE', 'date', 'Date']
         for attr_name in meta_attr_names:
             for attr_value in meta_attr_values:
-                if published_date == '':
+                if published_date == '' and not (attr_name == 'http-equiv' and attr_value == 'Last-Modified'):
                     published_date = self.get_meta_content(doc, 'meta[{0}="{1}"]'.format(attr_name, attr_value))
 
         tag_names = ['time', 'div', 'article', 'span', 'p']
