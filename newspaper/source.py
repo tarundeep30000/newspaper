@@ -9,7 +9,7 @@ __license__ = 'MIT'
 __copyright__ = 'Copyright 2014, Lucas Ou-Yang'
 
 import logging
-
+import re
 import feedparser
 
 from tldextract import tldextract
@@ -257,9 +257,9 @@ class Source(object):
         the articles out of each url with the url_to_article method
         """
         articles = []
-        for category in self.categories:
+        for category in self.categories[0:1]:
             cur_articles = []
-            url_title_tups = self.extractor.get_urls(category.doc, a_tag, titles=True)
+            url_title_tups = self.extractor.get_urls(self.doc, a_tag, titles=True)
             before_purge = len(url_title_tups)
 
             for tup in url_title_tups:
@@ -274,11 +274,11 @@ class Source(object):
                 )
                 cur_articles.append(_article)
 
-            cur_articles = self.purge_articles('url', cur_articles)
+#            cur_articles = self.purge_articles('url', cur_articles)
             after_purge = len(cur_articles)
 
-            if self.config.memoize_articles:
-                cur_articles = utils.memoize_articles(self, cur_articles)
+#            if self.config.memoize_articles:
+#                cur_articles = utils.memoize_articles(self, cur_articles)
             after_memo = len(cur_articles)
 
             articles.extend(cur_articles)
@@ -293,17 +293,17 @@ class Source(object):
     def _generate_articles(self, a_tag, url_filter):
         """Returns a list of all articles, from both categories and feeds
         """
-        category_articles = self.categories_to_articles()
-        #feed_articles = self.feeds_to_articles()
+        category_articles = self.categories_to_articles(a_tag)
+#        feed_articles = self.feeds_to_articles()
 
-        #articles = feed_articles + category_articles
+#        articles = feed_articles + category_articles
         articles = category_articles
         regex = re.compile(url_filter)
         articles = [article for article in articles if regex.search(article.url)]
         uniq = {article.url: article for article in articles}
         return uniq.values()
 
-    def generate_articles(self, a_tag, url_filter, limit=5000):
+    def generate_articles(self, a_tag, url_filter, limit=50000):
         """Saves all current articles of news source, filter out bad urls
         """
         articles = self._generate_articles(a_tag, url_filter)
