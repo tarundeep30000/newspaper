@@ -86,7 +86,7 @@ class Article(object):
         # List of authors who have published the article, via parse()
         self.authors = []
 
-        self.publish_date = u''
+        self.publish_date = None
 
         # Summary generated from the article's body txt
         self.summary = u''
