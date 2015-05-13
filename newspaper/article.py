@@ -330,6 +330,9 @@ class Article(object):
         self.set_keywords(keyws)
 
         summary_sents = nlp.summarize(title=self.title, text=self.text)
+        import operator
+        summary_sents = sorted(summary_sents, key=operator.itemgetter(1), reverse = False)
+        summary_sents = [x for (x, y) in summary_sents]
         summary = '\n'.join(summary_sents)
         self.set_summary(summary)
 

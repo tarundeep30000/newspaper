@@ -52,7 +52,7 @@ def score(sentences, titleWords, keywords):
         # Weighted average of scores from four categories
         totalScore = (titleFeature*1.5 + frequency*2.0 +
                       sentenceLength*1.0 + sentencePosition*1.0)/4.0
-        ranks[s] = totalScore
+        ranks[(s, i)] = totalScore
     return ranks
 
 
