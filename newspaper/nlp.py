@@ -20,7 +20,7 @@ with open(settings.NLP_STOPWORDS_EN, 'r') as f:
 ideal = 20.0
 
 
-def summarize(url='', title='', text=''):
+def summarize(url='', title='', text='', num_sentences = 5):
     if (text == '' or title == ''):
         return []
 
@@ -29,8 +29,8 @@ def summarize(url='', title='', text=''):
     keys = keywords(text)
     titleWords = split_words(title)
 
-    # Score setences, and use the top 5 sentences
-    ranks = score(sentences, titleWords, keys).most_common(5)
+    # Score sentences, and use the top 'num_sentences' sentences
+    ranks = score(sentences, titleWords, keys).most_common(num_sentences)
     for rank in ranks:
         summaries.append(rank[0])
     return summaries
@@ -131,6 +131,25 @@ def keywords(text):
     else:
         return dict()
 
+def handle_quotes(sentences):
+    curr_sentence = ''
+    nsentences = []
+    for ff in sentences:
+        if (ff.count('"') %2 == 0):
+            #flush is needed
+            if (curr_sentence != ""):
+                nsentences.append(curr_sentence)
+                curr_sentence = ''
+            nsentences.append(ff)
+            continue
+        else:
+            print "fooo(",ff, ")"
+            curr_sentence += ff
+            if (curr_sentence.count('"') % 2 == 0):
+                nsentences.append(curr_sentence)
+                curr_sentence = ''
+    sentences = nsentences
+    return sentences
 
 def split_sentences(text):
     """Split a large string into sentences
