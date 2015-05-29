@@ -151,6 +151,32 @@ def handle_quotes(sentences):
     sentences = nsentences
     return sentences
 
+def handle_linebreaks(sentences):
+    #sentences = [x.replace('\n', '') for x in sentences if len(x) > 10]
+    nsentences = []
+    for ff in sentences:
+        if (len(ff) <= 10):
+            continue
+        if ('\n' in ff):
+            curr_sentence = ''
+            fsentences = ff.split('\n')
+            for gg in curr_sentence:
+                if (curr_sentence == ''):
+                    curr_sentence = gg
+                    continue
+                elif (gg[0].isupper()):
+                    #assume a sentence break
+                    nsentences.append(curr_sentence)
+                    curr_sentence = gg
+                else :
+                    curr_sentence += " " + gg
+            if (curr_sentence != ''):
+                nsentences.append(curr_sentence)
+        else:
+            nsentences.append(ff)
+    sentences = nsentences
+    return sentences
+
 def split_sentences(text):
     """Split a large string into sentences
     """
@@ -158,7 +184,7 @@ def split_sentences(text):
     tokenizer = nltk.data.load('tokenizers/punkt/english.pickle')
 
     sentences = tokenizer.tokenize(text)
-    sentences = [x.replace('\n', '') for x in sentences if len(x) > 10]
+    sentences = handle_linebreaks(sentences)
     return sentences
 
 
